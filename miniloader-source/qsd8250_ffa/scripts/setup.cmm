@@ -1,0 +1,79 @@
+; Copyright 2007, Google Inc.
+
+; files
+;
+global &KERNEL
+global &KERNEL_ELF
+global &KERNEL_SRC
+global &RAMDISK
+global &SECOND_STAGE
+global &SYSTEM_IMG
+global &CMDLINE
+global &NANDWRITE_ELF
+
+; memory locations
+;
+global &TAGS_ADDR
+global &KERNEL_ADDR
+global &RAMDISK_ADDR
+global &RAMDISK_SIZE
+global &SECOND_STAGE_ADDR
+global &SYSTEM_IMG_ADDR
+global &SYSTEM_IMG_SIZE
+
+; misc
+global &MACHINE_ID
+
+global &TOP
+global &OUT
+global &NANDWRITE
+
+; relative path back up to the top of the device tree from here
+;
+&TOP="../../../../"
+
+; directory where the results of the device build live
+;
+&OUT="&(TOP)out/target/product/qsd8250_ffa/"
+
+; ----------------------------------------------------------------------
+; configure your memory layout, binary images, and commandline below:
+; ----------------------------------------------------------------------
+
+&KERNEL_ADDR=        0x16008000
+&RAMDISK_ADDR=       0x1A000000
+&TAGS_ADDR=          0x16000100
+&SECOND_STAGE_ADDR=  0x00300000
+&SYSTEM_IMG_ADDR=    0x1A000000
+
+;&MACHINE_ID=         0x59f ; halibut
+;&MACHINE_ID=         0x5a0 ; trout
+&MACHINE_ID=         0x0f6182 ; 8x50 FFA (1008002)
+
+;&KERNEL_SRC=         "../../../git/kernel-msm/"
+&KERNEL_SRC=         "&(TOP)../kernel/"
+;&KERNEL_SRC=         "/scratch/linux-msm/"
+;&KERNEL_SRC=         "/work/kernel/mergebox/"
+&KERNEL=             "&(KERNEL_SRC)arch/arm/boot/zImage"
+&KERNEL_ELF=         "&(KERNEL_SRC)vmlinux"
+
+&SECOND_STAGE=""
+;&SECOND_STAGE=      "wait"
+;&SECOND_STAGE=      "&(OUT)usbloader"
+
+&RAMDISK=            "&(OUT)ramdisk.img"
+&SYSTEM_IMG=         "&(OUT)system.img"
+&NANDWRITE=          "&(OUT)obj/EXECUTABLES/nandwrite_intermediates/nandwrite.elf"
+
+;&CMDLINE=         "mem=50M"
+;&CMDLINE=         "mem=64M"
+&CMDLINE=         "mem=110M"
+&CMDLINE=         "&(CMDLINE) console=ttyMSM2 androidboot.console=ttyMSM2"
+;&CMDLINE= "&(CMDLINE) board_halibut.ffa=1"
+;&CMDLINE=         "&(CMDLINE) console=tty1"
+;&CMDLINE=         "&(CMDLINE) androidboot.console=ttyMSM0"
+;&CMDLINE=         "&(CMDLINE) console=ttyDCC0"
+;&CMDLINE=         "&(CMDLINE) androidboot.console=ttyDCC0"
+;&CMDLINE=         "&(CMDLINE) console=null"
+
+; ----------------------------------------------------------------------

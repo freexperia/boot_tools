@@ -1,0 +1,69 @@
+;; Copyright 2007, Google Inc.
+;; flash driver script
+;;
+
+local &arg_ptn
+local &arg_img
+local &arg_extra
+local &arg_size
+
+local &result
+global &img_size
+local &status
+
+ENTRY &arg_ptn &arg_img &arg_extra
+do setup.cmm
+
+if ("&arg_extra"!="again")
+(
+  area
+  area.clear
+)
+
+if ("&arg_ptn"=="")
+(
+  print "USAGE: do flash <partition> <image>"
+  enddo
+)
+
+if ("&arg_extra"!="again")
+(
+  sys.down
+  sys.cpu scorpion
+  sys.jtagclock rtck
+  sys.mode attach
+  if state.run() 
+  (
+    break
+  )
+  data.load.elf "&(NANDWRITE)"
+)
+
+if ("&arg_img"=="MEMORY")
+(
+  &img_size=&arg_extra
+)
+else
+(
+  if ("&arg_img"!="")
+  (
+    if y.exist("\\flashimg")
+      symbol.delete \\flashimg
+    data.load.binary &arg_img 0x16001000 /name flashimg /noclear
+    &img_size=y.sizeof("\\flashimg")
+  )
+  else
+  (
+    &img_size=0
+  )
+)
+
+&arg_ptn="flash:&arg_ptn"
+
+if ("&arg_extra"!="dont_flash")
+(
+  do debug &arg_ptn 0x16001000 &img_size
+)
+
+entry &result
+enddo &result
