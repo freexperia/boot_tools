@@ -1,0 +1,14 @@
+tools for packing boot.img and other tools
+
+devices:
+
+board mogami:
+       - Xperia Arc
+       - Xperia Neo
+       - Xperia Mini
+       - Xperia Mini Pro
+
+board zeus:
+       - Xperia Play
+
+you need to place coresponding zImage and wifi modules !
