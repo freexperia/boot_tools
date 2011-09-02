@@ -1,6 +1,27 @@
 #!/sbin/sh
 
-cat /dev/input/event1 > /dev/keycheck&
+# event is device specific
+case `getprop ro.product.device` in
+anzu)
+    cat /dev/input/event1 > /dev/keycheck&
+;;
+hallon)
+    cat /dev/input/event1 > /dev/keycheck&
+;;
+mango)
+    cat /dev/input/event2 > /dev/keycheck&
+;;
+smultron)
+    cat /dev/input/event2 > /dev/keycheck&
+;;
+urushi)
+    cat /dev/input/event2 > /dev/keycheck&
+;;
+zeus)
+    cat /dev/input/event2 > /dev/keycheck&
+;;
+esac
+
 sleep 3
 kill -9 $!
 if [ -s /dev/keycheck -o -e /cache/recovery/boot ]

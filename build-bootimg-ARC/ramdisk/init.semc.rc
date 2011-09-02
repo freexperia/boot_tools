@@ -1,4 +1,6 @@
 on early-boot
+    #Run pre_hw_config.sh before entering charge only mode.
+    exec /sbin/sh /system/etc/pre_hw_config.sh
     # Boot into recovery
     exec /sbin/bootrec
 
@@ -15,12 +17,9 @@ on boot
     chmod 0770 /data/misc/wifi
     chown wifi wifi /data/misc/wifi/wpa_supplicant.conf
     chmod 0666 /data/misc/wifi/wpa_supplicant.conf
-    exec /init.hostapd.sh
-    chmod 0770 /data/misc/wifi/hostapd
+    chmod 0777 /data/misc/wifi/hostapd
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp system /data/misc/dhcp
-    # Copying hostapd.conf (WLAN HotSpot)
-    copy /system/etc/wifi/softap/hostapd.conf /data/misc/wifi/hostapd.conf
 
     # bluetooth power up/down interface
     mkdir /data/misc/bluetooth 0770 bluetooth bluetooth
@@ -113,13 +112,6 @@ on boot
     setprop net.tcp.buffersize.hsdpa 5840,87380,165467,4096,16384,110208
     setprop net.tcp.buffersize.hspa 5840,87380,165467,4096,16384,110208
 
-#    # insert SDIO-driver used by TI Wilink driver.
-#    # This is _not_ the default SDIO driver included in the kernel.
-#    insmod /system/lib/modules/sdio.ko
-#
-#    # Create the directories and files expected by the lcatp service
-#    # only found in eng builds
-
 on property:init.svc.bluetoothd=running
     write /sys/devices/virtual/bluetooth/hci0/link_supervision_timeout 6400
 
@@ -150,7 +142,7 @@ service hciattach /system/bin/hciattach -n /dev/ttyHS0 texas 3000000
     disabled
     oneshot
 
-service wlan_ap_loader /system/bin/tiap_loader -i /system/etc/wifi/softap/tiwlan_ap.ini -f /system/etc/wifi/softap/tiwlan_firmware_ap.bin -e /data/etc/wifi/fw
+service wlan_ap_loader /system/bin/tiap_loader.sh
     disabled
     oneshot
 
@@ -170,12 +162,9 @@ service hw_config /sbin/sh /system/etc/hw_config.sh
 	user root
 	oneshot
 
-service hdmid /system/bin/hdmid
-    user  system
-    group inet
-
-service touchd /system/bin/touchd
-    user root
+on early-boot
+    # Start touch firmware loader
+    exec /system/bin/cy8ctma300_fwloader -dev /sys/devices/platform/spi_qsd.0/spi0.0 -no_condition
 
 on boot
     chown system system /sys/kernel/hdmi_sii_kset/hdmi_sii_kobj/hdmi_sii_state_obj
@@ -183,6 +172,9 @@ on boot
 
     chown system system /dev/i2c-0
     chown system system /dev/uio0
+    chown system system /sys/class/leds/button-backlight-rgb1/brightness
+    chown system system /sys/class/leds/button-backlight-rgb2/brightness
+
 
 # Net mgr
 service netmgrd /system/bin/netmgrd -E
@@ -199,3 +191,12 @@ service nvcustomizer /system/bin/nvcustomizer
 service nvimport /system/bin/nvimport
     user root
     oneshot
+
+service hdmid /system/bin/hdmid
+    user  system
+    group inet
+
+service touchd /system/bin/touchd
+    user root
+
+service slidercounter /system/bin/slidercounter keypad-mango
